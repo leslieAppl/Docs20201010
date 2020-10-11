@@ -15,6 +15,8 @@ class ViewController: UIViewController {
 //        docsDir()
 //        appSuppDir()
         createMyFolder()
+        askContentsOfDir()
+        lookForFiles()
     }
     
     ///Get User sharing URL
@@ -46,14 +48,62 @@ class ViewController: UIViewController {
     // Create a folder 'MyFolder'
     func createMyFolder() {
         let folderName = "MyFolder"
+        let folderName2 = "MyFolder2"
+        let subFolderName = "SubFolderName"
+        
         ///1. Get the shared File Manager object.
         let fm = FileManager.default
         ///2. Use a FileManager instance to GET a URL pointing at the Documents directory
         let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         ///3. Generate a REFERENCE to the MyFolder folder from documents’ URL.
         let myFolder = docsURL.appendingPathComponent(folderName)
+        let myFolder2 = docsURL.appendingPathComponent(folderName2)
+        let subFolder = myFolder.appendingPathComponent(subFolderName)
         ///4. Using that REFERENCE (myfolder), ask the FileManager to create the folder if it doesn’t exist already;
         try! fm.createDirectory(at: myFolder, withIntermediateDirectories: true, attributes: nil)
+        try! fm.createDirectory(at: myFolder2, withIntermediateDirectories: true, attributes: nil)
+        try! fm.createDirectory(at: subFolder, withIntermediateDirectories: true, attributes: nil)
+    }
+    
+    // Ask files and folders exist within a directory (shallow way).
+    func askContentsOfDir() {
+        let fm = FileManager.default
+        ///GET URL REFERENCE
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let arr = try! fm.contentsOfDirectory(at: docsURL, includingPropertiesForKeys: nil )
+        arr.forEach { (url) in
+            print(url.lastPathComponent)
+//            print(url)
+        }
+        
+        //Looking for dir in a dirctory
+        ///Note: contentsOfDirectory() method doesn't permits you to decline to dive into subdirectory.
+        let docsURL2 = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let arr2 = try! fm.contentsOfDirectory(at: docsURL2, includingPropertiesForKeys: nil)
+        for url in arr2 where url.lastPathComponent == "SubFolderName" {
+            print("askContentsOfDir(): \(url.lastPathComponent)")
+        }
+    }
+    
+    // Looking for Files in a dirctory by means of a directory enumerator (deep way).
+    ///(This is efficient with regards to memory, because you are handed just one file reference at a time.)
+    func lookForFiles() {
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let dir = fm.enumerator(at: docsURL, includingPropertiesForKeys: nil)!
+        
+        for case let f as URL in dir where f.pathExtension == "txt" {
+            print(f.lastPathComponent)
+        }
+        
+        
+        //Note: Directory Enumerator permits you to decline to dive into a particular subdirectory.
+        let docsURL2 = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let dir2 = fm.enumerator(at: docsURL2, includingPropertiesForKeys: nil)!
+        for case let url as URL in dir2 where url.lastPathComponent == "SubFolderName" {
+            print("lookForFiles(): \(url.lastPathComponent)")
+        }
+        
     }
     
 }
