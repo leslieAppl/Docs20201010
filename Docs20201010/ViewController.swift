@@ -18,6 +18,7 @@ class ViewController: UIViewController {
         askContentsOfDir()
         lookForFiles()
         saveStringToFile()
+        saveArrayToFile()
     }
     
     ///Get User sharing URL
@@ -110,20 +111,43 @@ class ViewController: UIViewController {
         
     }
     
-    ///at: "docsDir" means documentDirectory;
+    ///at: "docsDir" means documentDirectory; "tempDir" means temporaryDirectory;
     ///for: "Folder Name"
-    func searchFolder(at rootDir: String, for name: String, handler: @escaping (_ fm: FileManager, _ url: URL) ->()) {
+    func searchFolder(at rootDir: String, for name: String?, handler: @escaping (_ fm: FileManager, _ url: URL) ->()) {
         let fm = FileManager.default
                 
         switch rootDir {
         case "docsDir":
             let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
             let dirs = fm.enumerator(at: docsURL, includingPropertiesForKeys: nil)!
-            for case let url as URL in dirs where url.lastPathComponent == name {
-                handler(fm, url)
+            
+            if let name = name {
+                for case let url as URL in dirs where url.lastPathComponent == name {
+                    print("search folder: \(name) is at path: \(url)")
+                    //Calling escaping closure
+                    handler(fm, url)
+                }
+            }
+            else {
+                print("Didn't enter folder name")
+                handler(fm, docsURL)
+            }
+        case "tempDir":
+            let temp = fm.temporaryDirectory
+            let dirs = fm.enumerator(at: temp, includingPropertiesForKeys: nil)!
+            
+            if let name = name {
+                for case let url as URL in dirs where url.lastPathComponent == name {
+                    print("search folder: \(name) is at path: \(url)")
+                    handler(fm, url)
+                }
+            }
+            else {
+                print("Didn't enter folder name")
+                handler(fm, temp)
             }
         default:
-            print("Can not find the folder: \(name)")
+            print("Can not find the folder: \(String(describing: name))")
             return
         }
     }
@@ -138,6 +162,24 @@ class ViewController: UIViewController {
             } catch let err as NSError {
                 print(err.userInfo)
             }
+        }
+    }
+    
+    // Saving NSArray and NSDictionary to a plist File
+    func saveArrayToFile() {
+        
+        searchFolder(at: "tempDir", for: nil) { (fm, url) in
+            do {
+                let arr = ["Manny", "Moe", "Jack"]
+                let f = url.appendingPathComponent("pep.plist")
+                try (arr as NSArray).write(to: f)
+            } catch let err as NSError {
+                print(err.userInfo)
+            }
+        }
+        
+        searchFolder(at: "tempDir", for: "pep.plist") { (fm, url) in
+            
         }
     }
     
