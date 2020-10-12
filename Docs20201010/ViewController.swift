@@ -168,14 +168,13 @@ class ViewController: UIViewController {
     // Saving NSArray and NSDictionary to a plist File
     func saveArrayToFile() {
         
-        searchFolder(at: "tempDir", for: nil) { (fm, url) in
-            do {
-                let arr = ["Manny", "Moe", "Jack"]
-                let f = url.appendingPathComponent("pep.plist")
-                try (arr as NSArray).write(to: f)
-            } catch let err as NSError {
-                print(err.userInfo)
-            }
+        do {
+            let arr = ["Manny", "Moe", "Jack"]
+            let temp = FileManager.default.temporaryDirectory
+            let f = temp.appendingPathComponent("pep.plist")
+            try (arr as NSArray).write(to: f)
+        } catch let err as NSError {
+            print(err.userInfo)
         }
         
         searchFolder(at: "tempDir", for: "pep.plist") { (fm, url) in
