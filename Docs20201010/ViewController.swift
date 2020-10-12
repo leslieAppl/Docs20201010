@@ -8,7 +8,7 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -17,13 +17,16 @@ class ViewController: UIViewController {
         createMyFolder()
         askContentsOfDir()
         lookForFiles()
+        saveStringToFile()
     }
     
     ///Get User sharing URL
     func docsDir() {
+        
         do {
             let fm = FileManager.default
             let docsURL = try fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            print(docsURL)
         } catch {
             //error
         }
@@ -31,6 +34,7 @@ class ViewController: UIViewController {
     
     //Get Private URL
     func appSuppDir() {
+        
         do {
             let fm = FileManager.default
             let suppURL = try fm.url(for: .applicationSupportDirectory, in: .userDomainMask, appropriateFor: nil, create: true)
@@ -42,11 +46,11 @@ class ViewController: UIViewController {
         } catch {
             // error
         }
-        
     }
     
     // Create a folder 'MyFolder'
     func createMyFolder() {
+        
         let folderName = "MyFolder"
         let folderName2 = "MyFolder2"
         let subFolderName = "SubFolderName"
@@ -104,6 +108,37 @@ class ViewController: UIViewController {
             print("lookForFiles(): \(url.lastPathComponent)")
         }
         
+    }
+    
+    ///at: "docsDir" means documentDirectory;
+    ///for: "Folder Name"
+    func searchFolder(at rootDir: String, for name: String, handler: @escaping (_ fm: FileManager, _ url: URL) ->()) {
+        let fm = FileManager.default
+                
+        switch rootDir {
+        case "docsDir":
+            let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let dirs = fm.enumerator(at: docsURL, includingPropertiesForKeys: nil)!
+            for case let url as URL in dirs where url.lastPathComponent == name {
+                handler(fm, url)
+            }
+        default:
+            print("Can not find the folder: \(name)")
+            return
+        }
+    }
+    
+    // Saving NSString Object to a text file
+    func saveStringToFile() {
+        
+        searchFolder(at: "docsDir", for: "MyFolder") { (fm, url) in
+            
+            do {
+                try "My name is Leslie2".write(to: url.appendingPathComponent("file2.txt"), atomically: true, encoding: .utf8)
+            } catch let err as NSError {
+                print(err.userInfo)
+            }
+        }
     }
     
 }

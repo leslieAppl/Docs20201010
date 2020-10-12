@@ -13,3 +13,9 @@
 ## Looking for Files in a dirctory by means of a directory enumerator (deep way).
 - This is efficient with regards to memory, because you are handed just one file reference at a time.
 - Note: Directory Enumerator permits you to decline to dive into a particular subdirectory.
+
+## SearchFolder() method - @escaping | Completion Handler Method 
+
+## Save String to File
+
+## 
