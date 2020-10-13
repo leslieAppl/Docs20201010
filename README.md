@@ -19,3 +19,5 @@
 ## Save String to File
 
 ## Save Array To File
+
+## Implementing NSCoding\NSSecureCoding
