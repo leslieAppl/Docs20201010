@@ -21,6 +21,8 @@ class ViewController: UIViewController {
         saveArrayToFile()
         createAndSavePersonAsAFile()
         retrieveSavedPerson()
+        savePersonToFile()
+        retrieveSavedPerson2()
     }
     
     ///Get User sharing URL
@@ -199,6 +201,7 @@ class ViewController: UIViewController {
     }
     
     //Creating, configuring, and saving a Person instance as a file.
+    //Put Encoded Data into Text File.
     func createAndSavePersonAsAFile() {
         let fm = FileManager.default
         let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
@@ -227,6 +230,40 @@ class ViewController: UIViewController {
         
         let person = try! NSKeyedUnarchiver.unarchivedObject(ofClass: Person.self, from: personData)!
         print("Retrieved Person Object: \(String(describing: person))")
+    }
+    
+    //Save Person to File Using Codable Protocol
+    //Put Encoded Data into Text File
+    func savePersonToFile() {
+        
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        
+        ///Person Object
+        let moi = Person2(firstName: "Hello", lastName: "World")
+        let moi2 = Person2(firstName: "Jobs", lastName: "Steve")
+        ///Encoding Person Object into Data Object
+        let moiData = try! PropertyListEncoder().encode(moi)
+        let moiData2 = try! PropertyListEncoder().encode(moi2)
+        ///File's URL
+        let moiFile = docsURL.appendingPathComponent("moi2.txt")
+        ///Write Data Object to Text File.
+        try! moiData.write(to: moiFile, options: .atomic)
+        try! moiData2.write(to: moiFile, options: .atomic)
+    }
+    
+    //Retrieve saved Person Object with Swift Codable from text file.
+    func retrieveSavedPerson2() {
+        
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        ///File's URL
+        let moiFile = docsURL.appendingPathComponent("moi2.txt")
+        ///Init Data Objects in the text file
+        let personData = try! Data(contentsOf: moiFile)
+        ///Decoding Data Object to Person2 Object
+        let person = try! PropertyListDecoder().decode(Person2.self, from: personData)
+        print("Retrieved Person2 Object: \(person)")
     }
 }
 

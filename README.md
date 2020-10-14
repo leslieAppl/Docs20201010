@@ -25,3 +25,5 @@
 ## Creating, configuring, and saving a Person instance as a file
 
 ## retrieveSavedPerson
+
+## Using Swift Codable to encode custom type to Data then write into text file
