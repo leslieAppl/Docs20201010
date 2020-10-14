@@ -20,6 +20,7 @@ class ViewController: UIViewController {
         saveStringToFile()
         saveArrayToFile()
         createAndSavePersonAsAFile()
+        retrieveSavedPerson()
     }
     
     ///Get User sharing URL
@@ -202,14 +203,30 @@ class ViewController: UIViewController {
         let fm = FileManager.default
         let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
         let moi = Person(firstName: "Choo", lastName: "Leslie")
+        ///Encodes an object graph with the given root object into a data representation, optionally requiring secure coding.
+        ///To prevent the possibility of encoding an object that NSKeyedUnarchiver can’t decode, set requiresSecureCoding to true whenever possible. This ensures that all encoded objects conform to NSSecureCoding.
         let moiData = try! NSKeyedArchiver.archivedData(withRootObject: moi, requiringSecureCoding: true)
-        let moiFile = docsURL.appendingPathComponent("mio.txt")
+        
+        ///A Reference to the File's URL
+        let moiFile = docsURL.appendingPathComponent("moi.txt")
+        ///Writes the contents of the data buffer to a location.
         try! moiData.write(to: moiFile, options: .atomic)
         
         lookAllFiles()
     }
     
     //Retrieve the saved Person
-    
+    func retrieveSavedPerson() {
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        ///A Reference to the File's URL
+        let moiFile = docsURL.appendingPathComponent("moi.txt")
+        ///A  byte buffer in memory.
+        ///You can create empty or pre-populated buffers from a variety of sources and later add or remove bytes.
+        let personData = try! Data(contentsOf: moiFile)
+        
+        let person = try! NSKeyedUnarchiver.unarchivedObject(ofClass: Person.self, from: personData)!
+        print("Retrieved Person Object: \(String(describing: person))")
+    }
 }
 
