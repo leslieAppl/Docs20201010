@@ -19,6 +19,7 @@ class ViewController: UIViewController {
         lookForFiles()
         saveStringToFile()
         saveArrayToFile()
+        createAndSavePersonAsAFile()
     }
     
     ///Get User sharing URL
@@ -111,6 +112,20 @@ class ViewController: UIViewController {
         
     }
     
+    //Look for all files in the documents folder
+    func lookAllFiles() {
+        
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let dirs = fm.enumerator(at: docsURL, includingPropertiesForKeys: nil)!
+        
+        for case let dir as URL in dirs {
+            let last = dir.lastPathComponent
+            var last2 = dir.deletingLastPathComponent().lastPathComponent
+            print("Listing directory enumerator: \(last2)/\(last)")
+        }
+    }
+    
     ///at: "docsDir" means documentDirectory; "tempDir" means temporaryDirectory;
     ///for: "Folder Name"
     func searchFolder(at rootDir: String, for name: String?, handler: @escaping (_ fm: FileManager, _ url: URL) ->()) {
@@ -181,6 +196,20 @@ class ViewController: UIViewController {
             
         }
     }
+    
+    //Creating, configuring, and saving a Person instance as a file.
+    func createAndSavePersonAsAFile() {
+        let fm = FileManager.default
+        let docsURL = try! fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+        let moi = Person(firstName: "Choo", lastName: "Leslie")
+        let moiData = try! NSKeyedArchiver.archivedData(withRootObject: moi, requiringSecureCoding: true)
+        let moiFile = docsURL.appendingPathComponent("mio.txt")
+        try! moiData.write(to: moiFile, options: .atomic)
+        
+        lookAllFiles()
+    }
+    
+    //Retrieve the saved Person
     
 }
 
