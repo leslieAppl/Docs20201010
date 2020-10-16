@@ -17,12 +17,18 @@ class ViewController: UIViewController {
         createMyFolder()
         askContentsOfDir()
         lookForFiles()
+        print()
         saveStringToFile()
         saveArrayToFile()
+        print()
         createAndSavePersonAsAFile()
         retrieveSavedPerson()
+        print()
         savePersonToFile()
         retrieveSavedPerson2()
+        print()
+        savePersonToFile3()
+        retrieveSavedPerson3()
     }
     
     ///Get User sharing URL
@@ -264,6 +270,57 @@ class ViewController: UIViewController {
         ///Decoding Data Object to Person2 Object
         let person = try! PropertyListDecoder().decode(Person2.self, from: personData)
         print("Retrieved Person2 Object: \(person)")
+    }
+    
+    func savePersonToFile3() {
+        // ==== the NSFileCoordinator way
+        do {
+            let fm = FileManager.default
+            let docsURL = try fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            
+            print("archiving Person using secure coding")
+            let moi = Person(firstName: "Less", lastName: "Is More")
+            let moiData = try NSKeyedArchiver.archivedData(withRootObject: moi, requiringSecureCoding: true)
+            let moiFile = docsURL.appendingPathComponent("moi3.txt")
+            
+            print("writing archived Person to file with NSFileCoordinator")
+            let fc = NSFileCoordinator()
+            let intent = NSFileAccessIntent.writingIntent(with: moiFile)
+            fc.coordinate(with: [intent], queue: .main) { (err) in
+                do {
+                    try moiData.write(to: intent.url, options: .atomic)
+                } catch {
+                    print(error)
+                }
+            }
+        } catch {
+            print(error)
+        }
+    }
+    
+    func retrieveSavedPerson3() {
+        // ==== the NSFileCoordinator way
+        do {
+            let fm = FileManager.default
+            let docsURL = try fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let moiFile = docsURL.appendingPathComponent("moi3.txt")
+            let fc = NSFileCoordinator()
+            let intent = NSFileAccessIntent.readingIntent(with: moiFile)
+            
+            print("retrieving secure archived Person with NSFileCoordinator")
+            fc.coordinate(with: [intent], queue: .main) { (err) in
+                do {
+                    let personData = try Data(contentsOf: intent.url)
+                    if let person = try NSKeyedUnarchiver.unarchivedObject(ofClass: Person.self, from: personData) {
+                        print(person)
+                    }
+                } catch {
+                    print(error)
+                }
+            }
+        } catch {
+            print(error)
+        }
     }
 }
 
