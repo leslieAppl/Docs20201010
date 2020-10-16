@@ -17,18 +17,26 @@ class ViewController: UIViewController {
         createMyFolder()
         askContentsOfDir()
         lookForFiles()
+        
         print()
         saveStringToFile()
         saveArrayToFile()
+        
         print()
         createAndSavePersonAsAFile()
         retrieveSavedPerson()
+        
         print()
         savePersonToFile()
         retrieveSavedPerson2()
+        
         print()
         savePersonToFile3()
         retrieveSavedPerson3()
+        
+        print()
+        saveDataIntoFileWrapper()
+        doRead()
     }
     
     ///Get User sharing URL
@@ -317,6 +325,70 @@ class ViewController: UIViewController {
                 } catch {
                     print(error)
                 }
+            }
+        } catch {
+            print(error)
+        }
+    }
+    
+    func saveDataIntoFileWrapper() {
+        do {
+            let fm = FileManager.default
+            let docsURL = try fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            
+            print("Inits File Wrapper.")
+            let d = FileWrapper(directoryWithFileWrappers: [:])
+
+            print("Added Image Arrary into File Wrapper")
+            let imNames = ["manny.jpg", "moe.jpg", "jack.jpg"]
+            for imName in imNames {
+                d.addRegularFile(withContents: UIImage(named: imName)!.jpegData(compressionQuality: 1)!, preferredFilename: imName)
+            }
+            
+            print("Added property list file into File Wrapper")
+            let list = try PropertyListEncoder().encode(imNames)
+            d.addRegularFile(withContents: list, preferredFilename: "list")
+            
+            let fwURL = docsURL.appendingPathComponent("myFileWrapper")
+            print("remove existed 'myFileWrapper' file")
+            try? fm.removeItem(at: fwURL)
+            
+            do {
+                print("Writes File Wrapper to a given file-system URL.")
+                try d.write(to: fwURL, originalContentsURL: nil)
+            } catch {
+                print(error)
+            }
+            
+        } catch {
+            print(error)
+        }
+    }
+    
+    func doRead() {
+        do {
+            let fm = FileManager.default
+            let docsURL = try fm.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
+            let fwURL = docsURL.appendingPathComponent("myFileWrapper")
+            
+            let d = try FileWrapper(url: fwURL)
+            
+            print("Gets 'list' file from File Wrapper through 'fileWrappers' property.")
+            if let list = d.fileWrappers?["list"]?.regularFileContents {
+                
+                let imNames = try PropertyListDecoder().decode([String].self, from: list)
+                print("Got", imNames)
+                
+                print("Gets Images from File Wrapper through 'fileWrappers' property")
+                for imName in imNames {
+                    if let imData = d.fileWrappers?[imName]?.regularFileContents {
+                        print("got image data for", imName)
+                        // in real life, do something with the image here
+                        _ = imData
+                    }
+                }
+            } else {
+                print("No list")
             }
         } catch {
             print(error)
